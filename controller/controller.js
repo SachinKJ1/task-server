@@ -25,10 +25,41 @@ exports.signUp = async (req, res) => {
 
 exports.getAllUser = async (req, res) => {
   try {
-    const users = await User.find();
+    // searching
+    /* const users = await User.find({
+      "username": { $regex: /Ice/, $options: "i" },
+    }); */
+    // pagination
+    const page = req.query["page"] || 1;
+    const skip = (page - 1) * 10;
+    const limit = 10;
+
+    // sorting
+    const sort = req.query["sort"]?.split(",").join(" ") || "-createdAt";
+
+    console.log(sort);
+
+    delete req.query["page"];
+    delete req.query["sort"];
+
+    const users = await User.find(req.query).sort(sort).skip(skip).limit(limit);
+
     res.status(200).json({
       status: "success",
       users,
+    });
+  } catch (error) {
+    res.status(401).json(error);
+  }
+};
+
+exports.getOneUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    d;
+    res.status(200).json({
+      status: "success",
+      data: user,
     });
   } catch (error) {
     res.status(401).json(error);
