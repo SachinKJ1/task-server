@@ -1,0 +1,66 @@
+Exercise: Angular & Node.js
+ 
+Build a user management system for an admin level role using Angular and Nodejs.
+ 
+Should contain the following:
+ 
+Admin login:
+ 
+- Design a login form for administrators, including fields for username and password.
+- Implement client-side validation to ensure proper input before sending data to the server.
+ 
+Create (C):
+ 
+Frontend (Angular):
+- Design a user interface for administrators to input new user details, including username, password, email, and role.
+- Implement a form component in React to capture the user input.
+- Validate the input data on the client side to ensure data integrity.
+- Use the fetch API or a library like Axios to send a POST request to the Node.js backend.
+ 
+Backend (Node.js):
+- Create an API endpoint (e.g., POST /api/users) to handle the creation of new users.
+- Validate and sanitize the incoming data on the server side.
+- Hash the user's password for security before storing it in the database.
+- Save the user information in the database (e.g., MongoDB, MySQL, etc.).
+- Return a response indicating the success or failure of the operation.
+ 
+Read (R):
+ 
+Frontend (Angular):
+- Display a list of users in the admin interface.
+- Implement a user details page to view individual user information.
+- Include search and filter functionalities to find specific users.
+ 
+Backend (Node.js):
+- Create API endpoints (e.g., GET /api/users and GET /api/users/:id) to retrieve a list of all users and a specific user's details, respectively.
+- Fetch data from the database and return it as a response to the frontend.
+- Implement pagination for large user datasets.
+ 
+Update (U):
+ 
+Frontend (Angular):
+- Allow administrators to edit user details in the user interface.
+- Use a form to capture the updated information.
+ 
+Backend (Node.js):
+- Create an API endpoint (e.g., PUT /api/users/:id) to handle the update operation.
+- Validate and sanitize the incoming data.
+- Update the user information in the database based on the provided ID.
+- Return a response indicating the success or failure of the operation.
+ 
+ 
+ 
+ 
+Delete (D):
+ 
+Frontend (Angular):
+- Provide a button or confirmation dialog for administrators to delete a user.
+ 
+Backend (Node.js):
+- Create an API endpoint (e.g., DELETE /api/users/:id) to handle the deletion of a user.
+- Remove the user from the database based on the provided ID.
+- Consider implementing soft deletes or additional confirmation steps to prevent accidental deletions.
+- Return a response indicating the success or failure of the operation.
+ 
+ 
+Manage the project using a GIT Repo.
