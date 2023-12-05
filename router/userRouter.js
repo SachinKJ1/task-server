@@ -7,9 +7,13 @@ const router = express.Router();
 
 router.post("/signUp", auth.signUp);
 
+router.post("/login", auth.login);
+
 router.get("/getAllUser", auth.getAllUser);
 
 router.get("/getOneUser/:id", auth.getOneUser);
+
+router.post("/createUser", auth.createUser);
 
 router.patch("/updateUser/:id", auth.updateUser);
 

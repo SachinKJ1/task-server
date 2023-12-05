@@ -30,10 +30,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: "user",
   },
-  createdAt:{
+  createdAt: {
     type: Date,
     default: Date.now(),
-  }
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -41,6 +41,13 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 8);
   next();
 });
+
+userSchema.methods.checkPassword = async function (
+  docPassword,
+  clientPassword
+) {
+  return await bcrypt.compare(docPassword, clientPassword);
+};
 
 const User = mongoose.model("User", userSchema);
 

@@ -19,7 +19,35 @@ exports.signUp = async (req, res) => {
       user,
     });
   } catch (error) {
-    res.status(401).json(error);
+    res.status(401).json({
+      status: "failure",
+      error,
+    });
+  }
+};
+
+exports.login = async (req, res) => {
+  try {
+    const user = await User.findOne({
+      email: req.body.email,
+    });
+
+    if (!(await user.checkPassword(req.body.password, user.password))) {
+      return res.status(401).json({
+        status: "failure",
+        error: "Invalid Email or password",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      user,
+    });
+  } catch (error) {
+    res.status(401).json({
+      status: "failure",
+      error,
+    });
   }
 };
 
@@ -27,7 +55,7 @@ exports.getAllUser = async (req, res) => {
   try {
     // searching
     /* const users = await User.find({
-      "username": { $regex: /Ice/, $options: "i" },
+      "username": { $regex: /bad/, $options: "i" },
     }); */
     // pagination
     const page = req.query["page"] || 1;
@@ -41,6 +69,7 @@ exports.getAllUser = async (req, res) => {
 
     delete req.query["page"];
     delete req.query["sort"];
+    // {username: "badusha", page : 1}
 
     const users = await User.find(req.query).sort(sort).skip(skip).limit(limit);
 
@@ -49,35 +78,64 @@ exports.getAllUser = async (req, res) => {
       users,
     });
   } catch (error) {
-    res.status(401).json(error);
+    res.status(401).json({
+      status: "failure",
+      error,
+    });
   }
 };
 
 exports.getOneUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    d;
+
     res.status(200).json({
       status: "success",
       data: user,
     });
   } catch (error) {
-    res.status(401).json(error);
+    res.status(401).json({
+      status: "failure",
+      error,
+    });
   }
 };
 
 exports.updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    let user;
+    if (!req.body.newPassword)
+      user = await User.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true,
+      });
+
+    if (
+      req.body.newPassword &&
+      req.body.curPassword &&
+      req.body.newPasswordConfirm
+    ) {
+      user = await User.findById(req.params.id);
+
+      if (!(await user.checkPassword(req.body.curPassword, user.password)))
+        return res.status(401).json({
+          status: "failure",
+          error: "Incorrect password",
+        });
+
+      user.password = req.body.newPassword;
+      user.save();
+    }
+
     res.status(201).json({
       status: "success",
       user,
     });
   } catch (error) {
-    res.status(401).json(error);
+    res.status(401).json({
+      status: "failure",
+      error,
+    });
   }
 };
 
@@ -89,6 +147,24 @@ exports.deleteUser = async (req, res) => {
       data: null,
     });
   } catch (error) {
-    res.status(401).json(error);
+    res.status(401).json({
+      status: "failure",
+      error,
+    });
+  }
+};
+
+exports.createUser = async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+    res.status(201).json({
+      status: "success",
+      user,
+    });
+  } catch (error) {
+    res.status(401).json({
+      status: "failure",
+      error,
+    });
   }
 };
