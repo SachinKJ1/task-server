@@ -71,13 +71,17 @@ exports.getAllUser = async (req, res) => {
     delete req.query["sort"];
     // {username: "badusha", page : 1}
 
+   
     const users = await User.find(req.query).sort(sort).skip(skip).limit(limit);
+    const count = await User.countDocuments(req.query);
 
     res.status(200).json({
       status: "success",
       users,
+      count,
     });
   } catch (error) {
+    console.log(error);
     res.status(401).json({
       status: "failure",
       error,
@@ -156,6 +160,7 @@ exports.deleteUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
+    console.log(req.body);
     const user = await User.create(req.body);
     res.status(201).json({
       status: "success",
