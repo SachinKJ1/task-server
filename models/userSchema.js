@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    minlength: 6,
+    minlength: 4,
   },
   password: {
     type: String,
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["admin", "user"],
     required: true,
-    default: "user",
+    default: "admin",
   },
   createdAt: {
     type: Date,
@@ -41,6 +41,11 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 8);
   next();
 });
+
+/* userSchema.pre(/find/g, async function (next) {
+  this.find({ role: { $ne: "admin" } });
+  next();
+}); */
 
 userSchema.methods.checkPassword = async function (
   docPassword,

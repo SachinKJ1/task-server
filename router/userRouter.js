@@ -9,14 +9,16 @@ router.post("/signUp", auth.signUp);
 
 router.post("/login", auth.login);
 
-router.get("/getAllUser", auth.getAllUser);
+// router.use(auth.protect)
 
-router.get("/getOneUser/:id", auth.getOneUser);
+router.get("/getAllUser",auth.protect, auth.getAllUser);
 
-router.post("/createUser", auth.createUser);
+router.get("/getOneUser/:id",auth.protect, auth.getOneUser);
 
-router.patch("/updateUser/:id", auth.updateUser);
+router.post("/createUser",auth.protect, auth.createUser);
 
-router.delete("/deleteUser/:id", auth.deleteUser);
+router.patch("/updateUser/:id",auth.protect, auth.updateUser);
+
+router.delete("/deleteUser/:id",auth.protect, auth.deleteUser);
 
 module.exports = router;

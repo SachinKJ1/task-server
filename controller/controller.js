@@ -1,5 +1,7 @@
+const { request } = require("http");
 const User = require("../models/userSchema");
-
+const jwt = require("jsonwebtoken");
+const { promisify } = require("util");
 /* exports.doSomething = async (req, res) => {
   try {
     const user = await User.create({
@@ -14,9 +16,11 @@ const User = require("../models/userSchema");
 exports.signUp = async (req, res) => {
   try {
     const user = await User.create(req.body);
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
     res.status(201).json({
       status: "success",
       user,
+      token,
     });
   } catch (error) {
     res.status(401).json({
@@ -26,11 +30,52 @@ exports.signUp = async (req, res) => {
   }
 };
 
+exports.protect = async (req, res, next) => {
+  try {
+    if (!req.headers.authorization)
+      return res
+        .status(401)
+        .json({ status: "failure", error: "You must be logged in" });
+
+    const token = req.headers.authorization.split(" ")[1];
+    
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    console.log(decoded)
+    const user = await User.findById(decoded.id);
+
+    if (!user)
+      return res
+        .status(401)
+        .json({ status: "failure", error: "User Doesnot Exist" });
+
+    req.user = user;
+
+    next();
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(401)
+      .json({ status: "failure", error: "Something went wrong" });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     const user = await User.findOne({
       email: req.body.email,
     });
+
+    if (!user)
+      return res.status(401).json({
+        status: "failure",
+        error: "Invalid Email or password",
+      });
+
+    if (user.role !== "admin")
+      return res.status(403).json({
+        status: "failure",
+        error: "You are not authorized to access this page",
+      });
 
     if (!(await user.checkPassword(req.body.password, user.password))) {
       return res.status(401).json({
@@ -39,9 +84,12 @@ exports.login = async (req, res) => {
       });
     }
 
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+
     res.status(200).json({
       status: "success",
       user,
+      token,
     });
   } catch (error) {
     res.status(401).json({
@@ -57,6 +105,10 @@ exports.getAllUser = async (req, res) => {
     /* const users = await User.find({
       "username": { $regex: /bad/, $options: "i" },
     }); */
+
+    // filtering out admins from the result
+    req.query["role"] = { $ne: "admin" };
+
     // pagination
     const page = req.query["page"] || 1;
     const skip = (page - 1) * 10;
@@ -65,13 +117,12 @@ exports.getAllUser = async (req, res) => {
     // sorting
     const sort = req.query["sort"]?.split(",").join(" ") || "-createdAt";
 
-    console.log(sort);
+    // console.log(sort);
 
     delete req.query["page"];
     delete req.query["sort"];
     // {username: "badusha", page : 1}
 
-   
     const users = await User.find(req.query).sort(sort).skip(skip).limit(limit);
     const count = await User.countDocuments(req.query);
 
@@ -128,8 +179,13 @@ exports.updateUser = async (req, res) => {
         });
 
       user.password = req.body.newPassword;
+      user.email = req.body.email;
+      user.role = req.body.role;
+      user.username = req.body.username;
       user.save();
     }
+
+    delete user.password;
 
     res.status(201).json({
       status: "success",
@@ -160,7 +216,9 @@ exports.deleteUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    console.log(req.body);
+    // can only add users
+    // req.body["role"] = "user";
+    // console.log(req.body);
     const user = await User.create(req.body);
     res.status(201).json({
       status: "success",
